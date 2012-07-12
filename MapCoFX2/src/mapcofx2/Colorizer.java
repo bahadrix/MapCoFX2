@@ -3,7 +3,9 @@
  */
 package mapcofx2;
 
+import mapcofx2.CSP.*;
 import java.util.*;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Ellipse;
 
 /**
@@ -32,10 +34,8 @@ public final class Colorizer {
 
         @Override
         public String toString() {
-            return "Node{" + "x=" + x + ", y=" + y + ", circle=" + circle + '}';
+            return "Node{" + "x=" + x + ", y=" + y + '}';
         }
-        
-        
     }
 
     public Colorizer(Plotter plotter) {
@@ -49,37 +49,59 @@ public final class Colorizer {
         System.out.println("Çizge oluşturuluyor..");
         createGraph();
         System.out.println("Çizge oluşturuldu.");
-        
-        CSP csp = new CSP(graph, this);
-        backTrack(csp, CSP.SUVType.SIMPLE, CSP.ODVType.SIMPLE);
 
-
+        CSP csp = new CSP(graph, 5, SUVType.SIMPLE, ODVType.SIMPLE, false);
+        CSP.AssignmentsState result = backTrackR(csp);
+        paintAssignment(result.getAssignments());
+        if (csp.checkComplete(result.getAssignments())) {
+            System.out.println("Problem çözüldü!");
+        } else {
+            System.out.println(result.getAssignments().size() + ". düğümden sonrası gelmedi ");
+        }
     }
 
-    public void backTrack(CSP csp, CSP.SUVType suvType, CSP.ODVType odvType) {
+    public void paintAssignment(List<Assignment> assignments) {
 
+        for (Assignment asg : assignments) {
 
-        Graph.Vertex variable;
-
-        while (true) {
-            variable = csp.selectUnassigned(suvType);
-            if (variable == null) {
-                break;
-            }
-            Node node = (Node)variable.getElement();
-            
-            
+            Node element = (Node) asg.variable.getElement();
+            element.circle.setFill(asg.color);
 
         }
 
 
+    }
 
+    public CSP.AssignmentsState backTrackR(CSP csp) {
+        return backTrackR(csp.new AssignmentsState(), csp);
+    }
+
+    public CSP.AssignmentsState backTrackR(CSP.AssignmentsState state, CSP csp) {
+
+        if (csp.checkComplete(state.getAssignments())) {
+            return state;
+        }
+
+        Graph.Vertex variable = csp.selectUnassigned();
+
+
+
+        for (Paint value : csp.orderDomain(variable)) {
+            CSP.AssignmentsState revertState = csp.new AssignmentsState(state);
+            if (state.addAssignment(csp.new Assignment(variable, value))) {
+                //TODO Inference eklenecek
+                return backTrackR(state, csp);
+            }
+            state = csp.new AssignmentsState(revertState);
+        }
+        System.out.println("Olmuyordu, zorlamadim..");
+        return state;
     }
 
     public void createGraph() {
 
         int N = 100;
-        int T = 16;
+        int T = 10;
         int x = 0;
         int y = 0;
 

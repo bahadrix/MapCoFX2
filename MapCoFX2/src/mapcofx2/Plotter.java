@@ -3,12 +3,14 @@
  */
 package mapcofx2;
 
+
 import java.util.LinkedList;
 import java.util.List;
 import javafx.event.EventHandler;
 import javafx.scene.Group;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Ellipse;
 import javafx.scene.shape.EllipseBuilder;
 import javafx.scene.shape.Line;
@@ -44,7 +46,7 @@ public class Plotter {
                 .centerY(scaleScalar(y))
                 .radiusX(circleRadius)
                 .radiusY(circleRadius)
-                .fill(Color.ORANGERED)
+                .fill(Color.DARKGREEN)
                 .build();
         
         
@@ -59,22 +61,26 @@ public class Plotter {
     
     public void drawLine(double x1, double y1, double x2, double y2) {
         
+        final Paint defLineColor = Color.GREENYELLOW;
+        final Paint hoverLineColor = Color.RED;
+        
         final Line line = LineBuilder.create()
                 .startX(scaleScalar(x1))
                 .startY(scaleScalar(y1))
                 .endX(scaleScalar(x2))
                 .endY(scaleScalar(y2))
+                .stroke(defLineColor)
                 .strokeWidth(2)
                 .build();
         
         line.setOnMouseEntered(new EventHandler<MouseEvent>() {
             @Override public void handle(MouseEvent e) {
-                line.setStroke(Color.RED);
+                line.setStroke(hoverLineColor);
             }
         });
         line.setOnMouseExited(new EventHandler<MouseEvent>() {
             @Override public void handle(MouseEvent e) {
-                line.setStroke(Color.BLACK);
+                line.setStroke(defLineColor);
             }
         });
         
