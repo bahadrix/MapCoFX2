@@ -248,12 +248,10 @@ public class CSP {
         Graph.Vertex variable = this.selectUnassigned();
         List<Paint> domain = this.orderDomain(variable);
 
-        Iterator<Paint> it = domain.iterator();
         
-        while (it.hasNext()) {
-        //for (Paint value : domain) {
+        for (Paint value : domain) {
             
-            Assignment assignment = new Assignment(variable, it.next());
+            Assignment assignment = new Assignment(variable, value);
             state.takeSnapshot();
             if (state.addAssignment(assignment)) {
                 //Inference
