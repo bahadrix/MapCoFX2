@@ -1,11 +1,11 @@
 /*
- *  Problemin çözüleceği sınıf burası. CSP algoritmaları burada implemente edilecek
+ *  Renklendirme işini yapan sınıf. Buradaki kodlar MapCoFX'.java dosyasına kaydırılarak
+ * bu dosya ortadan kaldırılabilir.
  */
 package mapcofx2;
 
 import mapcofx2.CSP.*;
 import java.util.*;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.Ellipse;
 
 /**
@@ -49,17 +49,33 @@ public final class Colorizer {
         System.out.println("Çizge oluşturuluyor..");
         createGraph();
         System.out.println("Çizge oluşturuldu.");
+        
+        // Kuru backTracking yap
+        //runWith(SUVType.SIMPLE, ODVType.SIMPLE, false);
+        runWith(SUVType.SIMPLE, ODVType.SIMPLE, true);
+        System.out.println("OK");
+    }
 
-        CSP csp = new CSP(graph, 5, SUVType.SIMPLE, ODVType.SIMPLE, false);
-        CSP.AssignmentsState result = backTrackR(csp);
+    
+    public void runWith(SUVType suvType, ODVType odvType, boolean forwarChecking) {
+        // Problemi oluştur
+        CSP csp = new CSP(graph, 5, suvType, odvType, forwarChecking);
+        CSP.AssignmentsState result = csp.backTrack();
+        
+        // Atamaya göre düğümleri boya
         paintAssignment(result.getAssignments());
+        
+        // Sonucu bildir
         if (csp.checkComplete(result.getAssignments())) {
             System.out.println("Problem çözüldü!");
         } else {
             System.out.println(result.getAssignments().size() + ". düğümden sonrası gelmedi ");
         }
+        
+        // İstatistikleri yaz
+        System.out.println(csp.stats);
     }
-
+    
     public void paintAssignment(List<Assignment> assignments) {
 
         for (Assignment asg : assignments) {
@@ -71,32 +87,8 @@ public final class Colorizer {
 
 
     }
-
-    public CSP.AssignmentsState backTrackR(CSP csp) {
-        return backTrackR(csp.new AssignmentsState(), csp);
-    }
-
-    public CSP.AssignmentsState backTrackR(CSP.AssignmentsState state, CSP csp) {
-
-        if (csp.checkComplete(state.getAssignments())) {
-            return state;
-        }
-
-        Graph.Vertex variable = csp.selectUnassigned();
-
-
-
-        for (Paint value : csp.orderDomain(variable)) {
-            CSP.AssignmentsState revertState = csp.new AssignmentsState(state);
-            if (state.addAssignment(csp.new Assignment(variable, value))) {
-                //TODO Inference eklenecek
-                return backTrackR(state, csp);
-            }
-            state = csp.new AssignmentsState(revertState);
-        }
-        System.out.println("Olmuyordu, zorlamadim..");
-        return state;
-    }
+    
+   
 
     public void createGraph() {
 
@@ -107,7 +99,7 @@ public final class Colorizer {
 
         Random rando = new Random();
 
-        ArrayList usedPositions = new ArrayList();
+        ArrayList<String> usedPositions = new ArrayList();
 
         // Create vertices
         for (int i = 0; i < N; i++) {

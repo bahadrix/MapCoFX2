@@ -1,13 +1,9 @@
 /*
- * Problemin CSP hali
+ * Problemin çözüleceği sınıf burası. CSP algoritmaları burada implemente edilecek
  */
 package mapcofx2;
 
-import java.awt.Transparency;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.Stack;
+import java.util.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import mapcofx2.Graph.Vertex;
@@ -36,8 +32,39 @@ public class CSP {
     private SUVType suvType;
     private ODVType odvType;
     private boolean forwardChecking;
+    final public Stats stats;
+    private static int checkIsConsistentCount = 0;
+    private static int selectUnassigneCallCount = 0;
+    private Map<Vertex, List<Paint>> domains;
 
-    
+    public class Stats {
+
+        public int checkIsCompleteCount = 0;
+        public int successfulAssignmentCount = 0;
+        public int failedAssignmentCount = 0;
+        public int orderDomainCallCount = 0;
+        public int revertCount = 0;
+        public int forwardCheckFailure = 0;
+
+        @Override
+        public String toString() {
+
+            return "STATS:\r\n"
+                    + "Is Soluble:" + (unassignedVariables.isEmpty()) + "\r\n"
+                    + "VARIABLE SELECT METHOD:" + suvType.name() + "\r\n"
+                    + "VALUE ORDER METHOD:" + odvType.name() + "\r\n"
+                    + "FORWARD CHECKING:" + forwardChecking + "\r\n"
+                    + "Forward Check Failure Count:" + forwardCheckFailure + "\r\n"
+                    + "Check is complete count:" + checkIsCompleteCount + "\r\n"
+                    + "Successfull assignment count:" + successfulAssignmentCount + "\r\n"
+                    + "Failed Assignment Count:" + failedAssignmentCount + "\r\n"
+                    + "Consistency check count:" + checkIsConsistentCount + "\r\n"
+                    + "Order-Domain Call Count:" + orderDomainCallCount + "\r\n"
+                    + "Select-Unassigned Call Count:" + selectUnassigneCallCount + "\r\n"
+                    + "Backtrack count:" + revertCount;
+        }
+    }
+
     public class Assignment {
 
         public Graph.Vertex variable;
@@ -52,6 +79,8 @@ public class CSP {
     public class AssignmentsState {
 
         private List<Assignment> assignments;
+        private List<Assignment> snapShot;
+        private Map<Vertex, List<Paint>> ssDomains;
 
         public AssignmentsState() {
             this.assignments = new LinkedList<>();
@@ -61,6 +90,17 @@ public class CSP {
             this.assignments = new LinkedList<>(cloneFrom.getAssignments());
         }
 
+        public void takeSnapshot() {
+            this.snapShot = new LinkedList<>(this.assignments);
+            this.ssDomains = new HashMap<>(domains);
+        }
+
+        public void revert() {
+            stats.revertCount++;
+            this.assignments = new LinkedList<>(this.snapShot);
+            domains = new HashMap<>(this.ssDomains);
+        }
+
         public List<Assignment> getAssignments() {
             return assignments;
         }
@@ -68,13 +108,17 @@ public class CSP {
         public boolean addAssignment(Assignment assignment) {
 
             if (this.assignments.contains(assignment)) {
+                stats.failedAssignmentCount++;
                 return false;
             }
 
             if (CSP.isConsistent(assignment, assignments)) {
                 this.assignments.add(assignment);
+                domains.get(assignment.variable).remove(assignment.color);
+                stats.successfulAssignmentCount++;
                 return true;
             } else {
+                stats.failedAssignmentCount++;
                 return false;
             }
 
@@ -94,24 +138,21 @@ public class CSP {
 
             return outStr;
         }
-        
-        
     }
-
 
     public CSP(Graph graph, int colorCount, SUVType suvType, ODVType odvType, boolean forwardChecking) {
         this.suvType = suvType;
         this.odvType = odvType;
-
+        this.stats = new Stats();
         this.forwardChecking = forwardChecking;
-        
+
         Queue<Paint> colors = new LinkedList<>();
         colors.add(Color.RED);
         colors.add(Color.BLUE);
         colors.add(Color.YELLOW);
         colors.add(Color.FUCHSIA);
         colors.add(Color.CYAN);
-        
+
 
 
         this.standartDomain = new LinkedList<>();
@@ -126,9 +167,16 @@ public class CSP {
 
         this.unassignedVariables = new LinkedList<>();
         unassignedVariables.addAll(graph.getVertices());
+
+        domains = new HashMap<>();
+        for (Vertex v : unassignedVariables) {
+            domains.put(v, new LinkedList<>(standartDomain));
+        }
+
     }
 
     public static boolean isConsistent(Assignment assignment, List<Assignment> assignments) {
+        checkIsConsistentCount++;
         List<Vertex> neighbours = assignment.variable.getNeighbours();
         for (Assignment asg : assignments) {
             // Yapılmış olanan bütün atamaları gez
@@ -144,9 +192,10 @@ public class CSP {
     }
 
     public boolean checkComplete(List<Assignment> assignments) {
+        stats.checkIsCompleteCount++;
         // Bütün atamalar yapılmış mı?
         if (unassignedVariables.size() > 0) {
-            System.out.println("Sayı dutmuyor" + unassignedVariables.size());
+
             return false;
         }
 
@@ -169,6 +218,7 @@ public class CSP {
     }
 
     public Vertex selectUnassigned() {
+        selectUnassigneCallCount++;
         switch (suvType) {
             case SIMPLE:
                 return unassignedVariables.size() > 0 ? unassignedVariables.remove(0) : null;
@@ -177,12 +227,85 @@ public class CSP {
     }
 
     public List<Paint> orderDomain(Graph.Vertex variable) {
+        stats.orderDomainCallCount++;
         switch (odvType) {
             case SIMPLE:
-                return new LinkedList<>(standartDomain);
+                return domains.get(variable);
         }
         return null;
     }
 
+    public CSP.AssignmentsState backTrack() {
+        return backTrack(new AssignmentsState());
+    }
 
+    public AssignmentsState backTrack(AssignmentsState state) {
+
+        if (this.checkComplete(state.getAssignments())) {
+            return state;
+        }
+
+        Graph.Vertex variable = this.selectUnassigned();
+        List<Paint> domain = this.orderDomain(variable);
+
+        Iterator<Paint> it = domain.iterator();
+        
+        while (it.hasNext()) {
+        //for (Paint value : domain) {
+            
+            Assignment assignment = new Assignment(variable, it.next());
+            state.takeSnapshot();
+            if (state.addAssignment(assignment)) {
+                //Inference
+                if (forwardChecking) {
+                    if (forwardCheck(assignment)) {
+                        return backTrack(state);
+                    } else {
+                        //TODO fc counter koy
+                        //stats.forwardCheckFailure++;
+                    }
+                } else {
+                    return backTrack(state);
+                }
+                
+            }
+
+            state.revert();
+
+        }
+        System.out.println("Olmuyordu, zorlamadim..");
+        return state;
+    }
+
+    public boolean forwardCheck(Assignment assignment) {
+
+        //komşuların domainlerini revize et, boşalan varsa false dön
+        Iterator<Vertex> it = assignment.variable.getNeighbours().iterator();
+        
+        
+        while(it.hasNext()) {
+            Vertex neighbour = it.next();
+            List<Paint> nDomain = domains.get(neighbour);
+            nDomain.remove(assignment.color);
+            if (nDomain.isEmpty()) return false;
+        }
+        
+        return false;
+    }
+
+    private boolean domainRevise(Graph.Edge arc) {
+        boolean revised = false;
+        List<Paint> startDomain = domains.get(arc.getStart());
+        List<Paint> finishDomain = domains.get(arc.getFinish());
+        
+        Iterator<Paint> it = startDomain.iterator();
+        while (it.hasNext()) {
+            Paint value = it.next();
+            if (finishDomain.contains(value)) {
+                it.remove();
+                revised = true;
+            }
+        }
+        return revised;
+    }
 }

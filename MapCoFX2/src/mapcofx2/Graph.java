@@ -82,6 +82,15 @@ public class Graph<E> {
                 return start;
             return null;
         }
+
+        public Vertex getFinish() {
+            return finish;
+        }
+
+        public Vertex getStart() {
+            return start;
+        }
+        
         
         
         @Override

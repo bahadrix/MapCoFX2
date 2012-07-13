@@ -93,6 +93,11 @@ public class Plotter {
     public List<Line> getLines() {
         return lines;
     }
+    
+    public void clear() {
+        pane.getChildren().clear();
+        this.lines = new LinkedList<>();
+    }
    
     
     

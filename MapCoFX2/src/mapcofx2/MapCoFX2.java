@@ -21,6 +21,7 @@ import javafx.stage.Stage;
  */
 public class MapCoFX2 extends Application {
 
+    private Plotter plotter;
     /**
      * @param args the command line arguments
      */
@@ -73,8 +74,15 @@ public class MapCoFX2 extends Application {
 
             @Override
             public void handle(KeyEvent e) {
-                if (e.getCode() == KeyCode.F11)
-                    primaryStage.setFullScreen(true);
+                
+                switch(e.getCode()) {
+                    case F11:
+                       primaryStage.setFullScreen(true); 
+                       break;
+                    case F5:
+                      plotter.clear();
+                      drawScene(root);
+                }
             }
         });
 
@@ -129,7 +137,7 @@ public class MapCoFX2 extends Application {
 
     private void drawScene(Group pane) {
 
-        Plotter plotter = new Plotter(pane);
+        plotter = new Plotter(pane);
         Colorizer colorizer = new Colorizer(plotter);
     }
 
