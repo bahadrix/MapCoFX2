@@ -67,8 +67,8 @@ public class CSP {
 
     public class Assignment {
 
-        public Graph.Vertex variable;
-        public Paint color;
+        final public Graph.Vertex variable;
+        final public Paint color;
 
         public Assignment(Vertex variable, Paint color) {
             this.variable = variable;
@@ -114,7 +114,7 @@ public class CSP {
 
             if (CSP.isConsistent(assignment, assignments)) {
                 this.assignments.add(assignment);
-                domains.get(assignment.variable).remove(assignment.color);
+                
                 stats.successfulAssignmentCount++;
                 return true;
             } else {
@@ -248,15 +248,20 @@ public class CSP {
         Graph.Vertex variable = this.selectUnassigned();
         List<Paint> domain = this.orderDomain(variable);
 
-        
-        for (Paint value : domain) {
+        Iterator<Paint> it = domain.iterator();
+        while(it.hasNext()) {
+ 
+            Paint value = it.next();
             
             Assignment assignment = new Assignment(variable, value);
+
             state.takeSnapshot();
             if (state.addAssignment(assignment)) {
+                it.remove(); // Ekleme yapildiysa domainden çıkar.
                 //Inference
                 if (forwardChecking) {
                     if (forwardCheck(assignment)) {
+                        
                         return backTrack(state);
                     } else {
                         //TODO fc counter koy
