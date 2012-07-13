@@ -51,8 +51,11 @@ public final class Colorizer {
         System.out.println("Çizge oluşturuldu.");
         
         // Kuru backTracking yap
-        //runWith(SUVType.SIMPLE, ODVType.SIMPLE, false);
+        runWith(SUVType.SIMPLE, ODVType.SIMPLE, false);
+        
+        // Forward checking yap
         runWith(SUVType.SIMPLE, ODVType.SIMPLE, true);
+        
         System.out.println("OK");
     }
 

@@ -32,6 +32,7 @@ public class CSP {
     private SUVType suvType;
     private ODVType odvType;
     private boolean forwardChecking;
+    
     final public Stats stats;
     private static int checkIsConsistentCount = 0;
     private static int selectUnassigneCallCount = 0;
@@ -46,6 +47,13 @@ public class CSP {
         public int revertCount = 0;
         public int forwardCheckFailure = 0;
 
+        public Stats() {
+            checkIsConsistentCount = 0;
+            selectUnassigneCallCount = 0;
+        }
+        
+        
+        
         @Override
         public String toString() {
 
@@ -114,7 +122,6 @@ public class CSP {
 
             if (CSP.isConsistent(assignment, assignments)) {
                 this.assignments.add(assignment);
-                
                 stats.successfulAssignmentCount++;
                 return true;
             } else {
@@ -247,7 +254,12 @@ public class CSP {
 
         Graph.Vertex variable = this.selectUnassigned();
         List<Paint> domain = this.orderDomain(variable);
-
+        if (domain.isEmpty()) {
+            
+            System.out.println("Empty domain");
+            return state;
+        }
+            
         Iterator<Paint> it = domain.iterator();
         while(it.hasNext()) {
  
@@ -264,8 +276,8 @@ public class CSP {
                         
                         return backTrack(state);
                     } else {
-                        //TODO fc counter koy
-                        //stats.forwardCheckFailure++;
+                      
+                        stats.forwardCheckFailure++;
                     }
                 } else {
                     return backTrack(state);
@@ -283,17 +295,18 @@ public class CSP {
     public boolean forwardCheck(Assignment assignment) {
 
         //komşuların domainlerini revize et, boşalan varsa false dön
-        Iterator<Vertex> it = assignment.variable.getNeighbours().iterator();
-        
-        
-        while(it.hasNext()) {
-            Vertex neighbour = it.next();
-            List<Paint> nDomain = domains.get(neighbour);
-            nDomain.remove(assignment.color);
-            if (nDomain.isEmpty()) return false;
+        List<Vertex> neighbours = assignment.variable.getNeighbours();
+       
+        for (Vertex neighbour : neighbours) {
+
+            List<Paint> neighbourDomain = domains.get(neighbour);
+            neighbourDomain.remove(assignment.color);
+            if (neighbourDomain.isEmpty()) {
+                return false;
+            }
         }
         
-        return false;
+        return true;
     }
 
     private boolean domainRevise(Graph.Edge arc) {
