@@ -130,6 +130,14 @@ public class CSP {
             }
 
         }
+        
+        public boolean removeAssignment(Assignment assignment) {
+            if (assignments.contains(assignment)) {
+                assignments.remove(assignment);
+                return true;
+            }
+            return false;
+        }
 
         @Override
         public String toString() {
@@ -266,7 +274,9 @@ public class CSP {
         if (this.checkComplete(state.getAssignments())) {
             return state;
         }
-
+        boolean getNewVariable;
+        do {
+        getNewVariable=false;
         Graph.Vertex variable = this.selectUnassigned();
         List<Paint> domain = this.orderDomain(variable);
         if (domain.isEmpty()) {
@@ -277,7 +287,6 @@ public class CSP {
             
         Iterator<Paint> it = domain.iterator();
         while(it.hasNext()) {
- 
             Paint value = it.next();
             
             Assignment assignment = new Assignment(variable, value);
@@ -298,17 +307,18 @@ public class CSP {
                             List<Paint> neighbourDomain = domains.get(neighbour);
                             neighbourDomain.add(assignment.color);
                         }
-                        state.revert();
-                        return backTrack(state);
+                        state.removeAssignment(assignment);
+                        getNewVariable = true;
+                        unassignedVariables.add(assignment.variable); //unassigned'lara geri ekle
                     }
                 } else {
                     return backTrack(state);
                 }
-                
-            }
             }
             state.revert();
-
+        }
+        } while(getNewVariable);
+            
         System.out.println("Olmuyordu, zorlamadim..");
         return state;
     }
