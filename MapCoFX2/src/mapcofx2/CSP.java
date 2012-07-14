@@ -85,7 +85,6 @@ public class CSP {
 
         private List<Assignment> assignments;
         private List<Assignment> snapShot;
-        private Map<Vertex, List<Paint>> ssDomains;
 
         public AssignmentsState() {
             this.assignments = new LinkedList<>();
@@ -97,13 +96,15 @@ public class CSP {
 
         public void takeSnapshot() {
             this.snapShot = new LinkedList<>(this.assignments);
-            this.ssDomains = new HashMap<>(domains);
+
         }
 
         public void revert() {
             stats.revertCount++;
             this.assignments = new LinkedList<>(this.snapShot);
-            domains = new HashMap<>(this.ssDomains);
+
+
+
         }
 
         public List<Assignment> getAssignments() {
@@ -164,7 +165,8 @@ public class CSP {
         colors.add(Color.YELLOW);
         colors.add(Color.FUCHSIA);
         colors.add(Color.CYAN);
-        /*          *
+        /*
+         * *
          * Random rndm = new Random(); Queue<Color> colors = new LinkedList<>();
          * for (int i=0; i<colorCount;i++) { Color clr = new
          * Color(rndm.nextDouble(),rndm.nextDouble(),rndm.nextDouble(),1.0);
@@ -244,7 +246,9 @@ public class CSP {
         selectUnassigneCallCount++;
         switch (suvType) {
             case SIMPLE:
-                return unassignedVariables.size() > 0 ? unassignedVariables.remove(0) : null;
+                return unassignedVariables.size() > 0
+                        ? unassignedVariables.remove(0)
+                        : null;
         }
         return null;
     }
@@ -294,6 +298,7 @@ public class CSP {
                         } else {
                             stats.forwardCheckFailure++;
                             //Komşuların domainlerine silinen rengi geri ekle
+                            // Silinenler burada eklendiği için state snaplshot'ından domains'i kaldırdım.
                             List<Vertex> neighbours = assignment.variable.getNeighbours();
 
                             for (Vertex neighbour : neighbours) {
@@ -304,6 +309,9 @@ public class CSP {
                             getNewVariable = true;
                             //unassigned'lara geri ekle?
                             //unassignedVariables.add(assignment.variable); 
+                            // bence geri eklemicez çünkü zaten şu anda o değişkenin domaini içersindeyiz.
+                            // yani en içteki döngü o değişkenin domainini çeviriyor zaten
+                            
                         }
                     } else {
                         return backTrack(state);
@@ -317,6 +325,13 @@ public class CSP {
         return state;
     }
 
+    /**
+     * Aslında forwardCheck orijanl domainler üzerinde değilde kopyaları
+     * üzerinde mi çalışsa dedim ama böylesi daha verimli olacak sanırım
+     *
+     * @param assignment
+     * @return
+     */
     public boolean forwardCheck(Assignment assignment) {
 
         //komşuların domainlerini revize et, boşalan varsa false dön
