@@ -302,7 +302,8 @@ public class CSP {
                             }
                             state.removeAssignment(assignment);
                             getNewVariable = true;
-                            unassignedVariables.add(assignment.variable); //unassigned'lara geri ekle
+                            //unassigned'lara geri ekle?
+                            //unassignedVariables.add(assignment.variable); 
                         }
                     } else {
                         return backTrack(state);

@@ -69,6 +69,9 @@ public final class Colorizer {
         paintAssignment(result.getAssignments());
         
         // Sonucu bildir
+        System.out.println();
+        System.out.println("=====");
+        System.out.println();
         if (csp.checkComplete(result.getAssignments())) {
             System.out.println("Problem çözüldü!");
         } else {
