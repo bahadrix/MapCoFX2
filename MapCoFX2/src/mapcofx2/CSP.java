@@ -152,26 +152,26 @@ public class CSP {
         this.odvType = odvType;
         this.stats = new Stats();
         this.forwardChecking = forwardChecking;
-
+/*
         Queue<Paint> colors = new LinkedList<>();
         colors.add(Color.RED);
         colors.add(Color.BLUE);
         colors.add(Color.YELLOW);
         colors.add(Color.FUCHSIA);
         colors.add(Color.CYAN);
-        
-        /* 50 renk için renklendirme:
+*/      
         float r,g,b;
         Random rndm = new Random();
-        Queue<Paint> colorz = new LinkedList<>();
+        Queue<Paint> colors = new LinkedList<>();
         for (int i=0; i<colorCount;i++) {
           r = rndm.nextFloat();
           g = rndm.nextFloat();
           b = rndm.nextFloat();
           Color clr = Color.color(r,g,b);
-          colorz.add(clr);
+          if (r+g+b<1.2)
+              clr = clr.brighter();
+          colors.add(clr);
         } 
-        */
 
 
 
