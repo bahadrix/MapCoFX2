@@ -159,6 +159,19 @@ public class CSP {
         colors.add(Color.YELLOW);
         colors.add(Color.FUCHSIA);
         colors.add(Color.CYAN);
+        
+        /* 50 renk için renklendirme:
+        float r,g,b;
+        Random rndm = new Random();
+        Queue<Paint> colorz = new LinkedList<>();
+        for (int i=0; i<colorCount;i++) {
+          r = rndm.nextFloat();
+          g = rndm.nextFloat();
+          b = rndm.nextFloat();
+          Color clr = Color.color(r,g,b);
+          colorz.add(clr);
+        } 
+        */
 
 
 
@@ -186,7 +199,7 @@ public class CSP {
         checkIsConsistentCount++;
         List<Vertex> neighbours = assignment.variable.getNeighbours();
         for (Assignment asg : assignments) {
-            // Yapılmış olanan bütün atamaları gez
+            // Yapılmış olan bütün atamaları gez
             for (Graph.Vertex neighbour : neighbours) {
                 // Verilen atamada kullanılan köşenin tüm komşularını gez
                 // Komşuya yapılmış bir atama var ve bu atama verilen atamadaki vertex ile aynı ise constraint sağlanmaz.
