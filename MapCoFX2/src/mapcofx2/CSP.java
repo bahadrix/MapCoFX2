@@ -60,13 +60,13 @@ public class CSP {
                     + "VALUE ORDER METHOD:" + odvType.name() + "\r\n"
                     + "FORWARD CHECKING:" + forwardChecking + "\r\n"
                     + "Forward Check Failure Count:" + forwardCheckFailure + "\r\n"
-                    + "Check is complete count:" + checkIsCompleteCount + "\r\n"
-                    + "Successfull assignment count:" + successfulAssignmentCount + "\r\n"
+                    + "Check Is Complete Count:" + checkIsCompleteCount + "\r\n"
+                    + "Successful Assignment Count:" + successfulAssignmentCount + "\r\n"
                     + "Failed Assignment Count:" + failedAssignmentCount + "\r\n"
                     + "Consistency check count:" + checkIsConsistentCount + "\r\n"
                     + "Order-Domain Call Count:" + orderDomainCallCount + "\r\n"
                     + "Select-Unassigned Call Count:" + selectUnassigneCallCount + "\r\n"
-                    + "Backtrack count:" + revertCount;
+                    + "Backtrack Count:" + revertCount;
         }
     }
 
@@ -200,7 +200,7 @@ public class CSP {
 
     }
 
-    public static boolean isConsistent(Assignment assignment, List<Assignment> assignments) {
+    /*public static boolean isConsistent(Assignment assignment, List<Assignment> assignments) {
         checkIsConsistentCount++;
         List<Vertex> neighbours = assignment.variable.getNeighbours();
         for (Assignment asg : assignments) {
@@ -212,6 +212,18 @@ public class CSP {
                     return false;
                 }
             }
+        }
+        return true;
+    }*/
+    
+    public static boolean isConsistent(Assignment assignment, List<Assignment> assignments) {
+        checkIsConsistentCount++;
+        List<Vertex> neighbours = assignment.variable.getNeighbours();
+        Color c1 = (Color)assignment.color;
+        for (Assignment asg : assignments) {
+            Color c2 = (Color)asg.color;
+            if (neighbours.contains(asg.variable)&& (c1.getRed()==c2.getRed() && c1.getGreen()==c2.getGreen() &&  c1.getBlue()==c2.getBlue()))
+                return false;
         }
         return true;
     }
@@ -228,14 +240,19 @@ public class CSP {
         for (Assignment asg : assignments) {
             // Bütün atamaların komşuları
             List<Vertex> neighbours = asg.variable.getNeighbours();
+            Color c1 = (Color)asg.color;
             for (Assignment asg2 : assignments) {
                 // Bütün atamalarda
-                for (Vertex neighbour : neighbours) {
+                Color c2 = (Color)asg2.color;
+                if (neighbours.contains(asg2.variable) && (c1.getRed()==c2.getRed() && c1.getGreen()==c2.getGreen() &&  c1.getBlue()==c2.getBlue())) {
+                        return false;
+                }
+                /*for (Vertex neighbour : neighbours) {
                     // Komşular
                     if (asg2.variable.equals(neighbour) && asg2.color.equals(asg.color)) {
                         return false;
                     }
-                }
+                }*/
             }
         }
 
