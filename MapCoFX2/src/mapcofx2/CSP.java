@@ -220,7 +220,7 @@ public class CSP {
         stats.checkIsCompleteCount++;
         // Bütün atamalar yapılmış mı?
         if (unassignedVariables.size() > 0) {
-
+            
             return false;
         }
 
@@ -249,8 +249,24 @@ public class CSP {
                 return unassignedVariables.size() > 0
                         ? unassignedVariables.remove(0)
                         : null;
+            case MRV:
+                if (unassignedVariables.size()>0) {
+                    int min=colorCount+1,pntr=0;
+                    for (Vertex v : unassignedVariables) {
+                        List<Paint> colors = domains.get(v);
+                        if (colors.size()<=min) {
+                            min = colors.size();
+                            pntr = unassignedVariables.indexOf(v);
+                        }
+                    }
+                    return unassignedVariables.remove(pntr);
+                }
+                return null;
+            default: 
+                return unassignedVariables.size() > 0
+                        ? unassignedVariables.remove(0)
+                        : null;
         }
-        return null;
     }
 
     public List<Paint> orderDomain(Graph.Vertex variable) {
@@ -258,8 +274,8 @@ public class CSP {
         switch (odvType) {
             case SIMPLE:
                 return domains.get(variable);
+            default: return null;
         }
-        return null;
     }
 
     public CSP.AssignmentsState backTrack() {
