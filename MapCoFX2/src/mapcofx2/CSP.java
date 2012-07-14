@@ -152,30 +152,31 @@ public class CSP {
         this.odvType = odvType;
         this.stats = new Stats();
         this.forwardChecking = forwardChecking;
-
-        Queue<Paint> colors = new LinkedList<>();
+       
+        Queue<Color> colors = new LinkedList<>();
         colors.add(Color.RED);
         colors.add(Color.BLUE);
         colors.add(Color.YELLOW);
         colors.add(Color.FUCHSIA);
         colors.add(Color.CYAN);
-      
-/*     
+/*    
+ 
         Random rndm = new Random();
         Queue<Color> colors = new LinkedList<>();
         for (int i=0; i<colorCount;i++) {
           Color clr = new Color(rndm.nextDouble(),rndm.nextDouble(),rndm.nextDouble(),1.0); //red,green,blue,opacity
           while (clr.getRed()+clr.getGreen()+clr.getBlue()<1.2)
               clr = clr.brighter();
-          while (clr.getRed()+clr.getGreen()+clr.getBlue()>2.8)
-              clr = clr.darker();
           clr = clr.saturate();
           while (colors.contains(clr))
               clr = new Color(rndm.nextDouble(),rndm.nextDouble(),rndm.nextDouble(),1.0);
+          for (Color c : colors) {
+              if (((c.getRed()+c.getGreen()+c.getBlue())-(clr.getRed()+clr.getGreen()+clr.getBlue()))<0.3)
+                  clr = new Color(rndm.nextDouble(),rndm.nextDouble(),rndm.nextDouble(),1.0);
+          }
           colors.add(clr);
         }
 */
-
         this.standartDomain = new LinkedList<>();
 
         for (int i = 0; i < colorCount; i++) {
@@ -287,21 +288,27 @@ public class CSP {
                 //Inference
                 if (forwardChecking) {
                     if (forwardCheck(assignment)) {
-                        
                         return backTrack(state);
                     } else {
-                      
                         stats.forwardCheckFailure++;
+                        //Komşuların domainlerine silinen rengi geri ekle
+                        List<Vertex> neighbours = assignment.variable.getNeighbours(); 
+       
+                        for (Vertex neighbour : neighbours) {
+                            List<Paint> neighbourDomain = domains.get(neighbour);
+                            neighbourDomain.add(assignment.color);
+                        }
+                        state.revert();
+                        return backTrack(state);
                     }
                 } else {
                     return backTrack(state);
                 }
                 
             }
-
+            }
             state.revert();
 
-        }
         System.out.println("Olmuyordu, zorlamadim..");
         return state;
     }

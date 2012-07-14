@@ -25,7 +25,7 @@ public class Graph<E> {
 
         public Vertex(E data) {
             this.element = data;
-            this.incidents =  new LinkedList<Edge>();
+            this.incidents =  new LinkedList<>();
         }
 
         public E getElement() {
