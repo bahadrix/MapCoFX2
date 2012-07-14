@@ -152,28 +152,29 @@ public class CSP {
         this.odvType = odvType;
         this.stats = new Stats();
         this.forwardChecking = forwardChecking;
-/*
+
         Queue<Paint> colors = new LinkedList<>();
         colors.add(Color.RED);
         colors.add(Color.BLUE);
         colors.add(Color.YELLOW);
         colors.add(Color.FUCHSIA);
         colors.add(Color.CYAN);
-*/      
-        float r,g,b;
+      
+/*     
         Random rndm = new Random();
-        Queue<Paint> colors = new LinkedList<>();
+        Queue<Color> colors = new LinkedList<>();
         for (int i=0; i<colorCount;i++) {
-          r = rndm.nextFloat();
-          g = rndm.nextFloat();
-          b = rndm.nextFloat();
-          Color clr = Color.color(r,g,b);
-          if (r+g+b<1.2)
+          Color clr = new Color(rndm.nextDouble(),rndm.nextDouble(),rndm.nextDouble(),1.0); //red,green,blue,opacity
+          while (clr.getRed()+clr.getGreen()+clr.getBlue()<1.2)
               clr = clr.brighter();
+          while (clr.getRed()+clr.getGreen()+clr.getBlue()>2.8)
+              clr = clr.darker();
+          clr = clr.saturate();
+          while (colors.contains(clr))
+              clr = new Color(rndm.nextDouble(),rndm.nextDouble(),rndm.nextDouble(),1.0);
           colors.add(clr);
-        } 
-
-
+        }
+*/
 
         this.standartDomain = new LinkedList<>();
 
