@@ -51,7 +51,7 @@ public final class Colorizer {
         System.out.println("Çizge oluşturuldu.");
         
         // Kuru backTracking yap
-        runWith(SUVType.SIMPLE, ODVType.SIMPLE, false);
+        //runWith(SUVType.SIMPLE, ODVType.SIMPLE, false);
         
         // Forward checking yap
         runWith(SUVType.SIMPLE, ODVType.SIMPLE, true);
@@ -69,7 +69,7 @@ public final class Colorizer {
         paintAssignment(result.getAssignments());
         
         // Sonucu bildir
-        if (csp.checkComplete(result.getAssignments())) {
+        if (result.checkComplete()) {
             System.out.println("Problem çözüldü!");
         } else {
             System.out.println(result.getAssignments().size() + ". düğümden sonrası gelmedi ");
