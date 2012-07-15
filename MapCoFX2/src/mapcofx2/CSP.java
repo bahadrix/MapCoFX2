@@ -131,8 +131,49 @@ public class CSP {
             switch (suvType) {
                 case SIMPLE:
                     return unassignedVariables.size() > 0 ? unassignedVariables.remove(0) : null;
+                case MRV:
+
+                    PriorityQueue<Graph.Vertex> MRVOrdered = new PriorityQueue(unassignedVariables.size(), new Comparator() {
+
+                        @Override
+                        public int compare(Object t, Object t1) {
+                            // -1 ise t önce gelir demekti sanırım.
+                            Vertex v1 = (Vertex) t;
+                            Vertex v2 = (Vertex) t1;
+                            
+                            int d1Size = domains.get(v1).size();
+                            int d2Size = domains.get(v2).size();
+                            
+                            if (d1Size == d2Size) {
+                                if (suvType == SUVType.DEGREE) {
+                                    if (v1.neighbourCount() > v2.neighbourCount()) {
+                                        return -1;
+                                    } else if (v1.neighbourCount() == v2.neighbourCount()) {
+                                        return 0;
+                                    } else {
+                                        return 1;
+                                    }
+                                } else {
+                                    return 0;
+                                }
+                            } else if (d1Size < d2Size) {
+                                return -1;
+                            } else {
+                                return 1;
+                            }
+
+                        }
+                    });
+                    System.out.println(domains);
+                    MRVOrdered.addAll(unassignedVariables);
+                    return MRVOrdered.poll();
+                            
+                default:
+                    return unassignedVariables.size() > 0
+                            ? unassignedVariables.remove(0)
+                            : null;
             }
-            return null;
+
         }
 
         public List<Paint> orderDomain(Graph.Vertex variable) {
@@ -211,11 +252,11 @@ public class CSP {
             List<Vertex> neighbours = actionAssignment.variable.getNeighbours();
 
             //Map<Vertex, List<Paint>> domainsClone = new HashMap<>(domains);
-            
-           
+
+
             for (Vertex neighbour : neighbours) { // Komşulardan    
                 if (unassignedVariables.contains(neighbour)) { // Atanmamış olanlara bak
-                    
+
                     List<Paint> neighbourDomain = domains.get(neighbour);
 
 
@@ -338,9 +379,9 @@ public class CSP {
 
                 Assignment assignment = new Assignment(variable, value);
                 parentStateIterator.remove(); // Atama uygun olsa da olmasada domainden rengi çıkar
-                
+
                 AssignmentsState newState = state.addAssignment(assignment);
-                 
+
                 if (newState != null) {
 
                     //Inference
