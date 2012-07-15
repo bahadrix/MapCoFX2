@@ -125,7 +125,10 @@ public class CSP {
             this.unassignedVariables = new LinkedList<>(cloneFrom.unassignedVariables);
 
         }
-
+        /*
+         * Bahadır: 
+         *  
+         
         public Vertex selectUnassigned() {
             selectUnassigneCallCount++;
             switch (suvType) {
@@ -184,7 +187,111 @@ public class CSP {
             }
             return null;
         }
+        */
+        
+        /*
+         * Umut:
+         */
+        public Vertex selectUnassigned() {
+            selectUnassigneCallCount++;
+            switch (suvType) {
+                case SIMPLE:
+                    return unassignedVariables.size() > 0
+                            ? unassignedVariables.remove(0)
+                            : null;
+                case MRV:
+                    if (unassignedVariables.size() > 0) {
+                        int min = colorCount + 1, pntr = 0;
+                        for (Vertex v : unassignedVariables) {
+                            List<Paint> colors = domains.get(v);
+                            if (colors.size() <= min) {
+                                min = colors.size();
+                                pntr = unassignedVariables.indexOf(v);
+                            }
+                        }
+                        return unassignedVariables.remove(pntr);
+                    }
+                    return unassignedVariables.size() > 0
+                        ? unassignedVariables.remove(0)
+                        : null;
+                case DEGREE:
+                    if (unassignedVariables.size()>0) {
+                        int min = colorCount+1;
+                        SortedMap<Integer, Vertex> heuristicMap = new TreeMap<>();
+                        // minimum remaining value'yu bul.
+                        for (Vertex v : unassignedVariables) {
+                            List<Paint> colors = domains.get(v);
+                            if (colors.size() < min) {
+                                min = colors.size();
+                            }
+                        }
+                        // eşitleri Map'e ekle
+                        for (Vertex v : unassignedVariables) {
+                            List<Paint> colors = domains.get(v);
+                            if (colors.size() == min) {
+                                int heuristic = 0;
+                                List<Vertex> neighbours = v.getNeighbours();
+                                for (Vertex x : neighbours) {
+                                    if (unassignedVariables.contains(x)) //eğer x köşesi atanmamışsa heuristiği arttır.
+                                        heuristic++;
+                                }
+                                heuristicMap.put(heuristic,v); //heuristicler birbirine eşitse en son eklenen vertex o heuristic'in vertex'i olur
+                            }
+                        }
+                        int max = heuristicMap.lastKey(); //en yüksek key'i al.
+                        Vertex toRemove = heuristicMap.get(max); //silinicek vertex'i al
+                        if (unassignedVariables.remove(toRemove)) {
+                            return toRemove;
+                        }
+                    }
+                    return unassignedVariables.size() > 0
+                        ? unassignedVariables.remove(0)
+                        : null;
+                default:
+                    return unassignedVariables.size() > 0
+                        ? unassignedVariables.remove(0)
+                        : null;
+        }
+    }
 
+    public List<Paint> orderDomain(Graph.Vertex variable) {
+        stats.orderDomainCallCount++;
+        switch (odvType) {
+            case SIMPLE:
+                return domains.get(variable);
+            case LCV:
+                List<Vertex> neighbours = variable.getNeighbours(); //bütün komşular
+                List<Vertex> unassignedNeighbours = new LinkedList<>(); //atanmamış komşular
+                List<Paint> currentColors = domains.get(variable);
+                for (Vertex v : neighbours) {
+                    if (unassignedVariables.contains(v)) { //atanmamış komşuları ekle
+                        unassignedNeighbours.add(v);
+                    }
+                }
+                ArrayList<LCV> pLCV = new ArrayList<>();
+                for (int i = 0; i<currentColors.size(); i++) {
+                    int lcv=0;
+                    for (Vertex v : unassignedNeighbours) {
+                        List<Paint> colors = new LinkedList<>(domains.get(v));
+                        if (!colors.contains(currentColors.get(i))) 
+                            continue;
+                        colors.remove(currentColors.get(i));
+                        lcv += colors.size();
+                    }
+                    LCV lvc1 = new LCV(lcv,currentColors.get(i));
+                    pLCV.add(lvc1);
+                }
+                pLCV.trimToSize();
+                Collections.sort(pLCV,LCV.tableComp);
+                currentColors.clear(); //listeyi boşaltalım
+                for (int i = pLCV.size()-1; i>=0;i--) {
+                    currentColors.add(pLCV.get(i).lcvpaint);
+                }
+                return domains.get(variable);
+            default:
+                return null;
+        }
+    }    
         public List<Assignment> getAssignments() {
             return assignments;
         }
@@ -292,6 +399,25 @@ public class CSP {
             }
 
             return outStr;
+        }
+    }
+    
+    public static class LCV {
+        public int lcv;
+        public Paint lcvpaint;        
+        private static Comparator<LCV> tableComp = new Comparator<LCV>() {
+        @Override
+        public int compare(LCV l1, LCV l2) {
+          return l1.lcv - l2.lcv;
+        }
+       };
+        
+        public LCV() {
+        }
+        
+        public LCV(int i, Paint p) {
+            lcv = i;
+            lcvpaint = p;
         }
     }
 

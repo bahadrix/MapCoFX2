@@ -55,7 +55,7 @@ public final class Colorizer {
         //runWith(SUVType.SIMPLE, ODVType.SIMPLE, true, false);
         
         // TODO Sadece MRV olunca çalışmıyopr enteresan
-        runWith(SUVType.DEGREE, ODVType.SIMPLE, true, true);
+        runWith(SUVType.DEGREE, ODVType.LCV, true, true);
 
         System.out.println("OK");
     }
