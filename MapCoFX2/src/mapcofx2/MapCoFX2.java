@@ -64,8 +64,8 @@ public class MapCoFX2 extends Application {
                 double newScale = (currentScale + delta) < 0 ? 0.1
                         : (currentScale + delta) > 20 ? 20
                         : (currentScale + delta);
-                root.setScaleX(newScale+root.getScaleX());
-                root.setScaleY(newScale+root.getScaleY());
+                root.setScaleX(newScale);
+                root.setScaleY(newScale);
 
             }
         });
