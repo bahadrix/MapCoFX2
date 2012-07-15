@@ -3,7 +3,6 @@
  */
 package mapcofx2;
 
-import com.sun.javaws.exceptions.ExitException;
 import java.util.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -25,6 +24,16 @@ public class CSP {
 
         SIMPLE, LCV
     }
+    
+    public static final Color[] COLORS = {
+        
+        Color.RED, Color.BLUE, Color.YELLOW, Color.FUCHSIA, Color.CYAN, Color.BEIGE, Color.BROWN, Color.CORAL, Color.CORNFLOWERBLUE, Color.DARKCYAN,
+        Color.SEAGREEN, Color.SALMON, Color.SLATEBLUE, Color.WHITE, Color.DARKGRAY, Color.DARKORANGE, Color.GOLD, Color.INDIGO, Color.LAWNGREEN, Color.LIGHTSTEELBLUE,
+        Color.LIME, Color.MAROON, Color.MAGENTA, Color.NAVY, Color.ORCHID, Color.PALEGREEN, Color.PALEVIOLETRED, Color.ROSYBROWN, Color.TAN, Color.TEAL,
+        Color.TOMATO, Color.VIOLET, Color.WHEAT, Color.SILVER, Color.PALEGOLDENROD, Color.AQUA, Color.ALICEBLUE, Color.AQUAMARINE, Color.CORNSILK, Color.BLACK,
+        Color.YELLOWGREEN, Color.SIENNA, Color.MIDNIGHTBLUE, Color.MINTCREAM, Color.PALETURQUOISE, Color.ANTIQUEWHITE, Color.CHOCOLATE, Color.CRIMSON, Color.FIREBRICK, Color.DEEPPINK    
+    
+    };
     private Graph graph;
     private int vertexCount;
     private int colorCount;
@@ -125,73 +134,7 @@ public class CSP {
             this.unassignedVariables = new LinkedList<>(cloneFrom.unassignedVariables);
 
         }
-        /*
-         * Bahadır: 
-         *  
-         
-        public Vertex selectUnassigned() {
-            selectUnassigneCallCount++;
-            switch (suvType) {
-                case SIMPLE:
-                    return unassignedVariables.size() > 0 ? unassignedVariables.remove(0) : null;
-                case MRV:
-
-                    PriorityQueue<Graph.Vertex> MRVOrdered = new PriorityQueue(unassignedVariables.size(), new Comparator() {
-
-                        @Override
-                        public int compare(Object t, Object t1) {
-                            // -1 ise t önce gelir demekti sanırım.
-                            Vertex v1 = (Vertex) t;
-                            Vertex v2 = (Vertex) t1;
-                            
-                            int d1Size = domains.get(v1).size();
-                            int d2Size = domains.get(v2).size();
-                            
-                            if (d1Size == d2Size) {
-                                if (suvType == SUVType.DEGREE) {
-                                    if (v1.neighbourCount() > v2.neighbourCount()) {
-                                        return -1;
-                                    } else if (v1.neighbourCount() == v2.neighbourCount()) {
-                                        return 0;
-                                    } else {
-                                        return 1;
-                                    }
-                                } else {
-                                    return 0;
-                                }
-                            } else if (d1Size < d2Size) {
-                                return -1;
-                            } else {
-                                return 1;
-                            }
-
-                        }
-                    });
-                    System.out.println(domains);
-                    MRVOrdered.addAll(unassignedVariables);
-                    return MRVOrdered.poll();
-                            
-                default:
-                    return unassignedVariables.size() > 0
-                            ? unassignedVariables.remove(0)
-                            : null;
-            }
-
-        }
-
-        public List<Paint> orderDomain(Graph.Vertex variable) {
-            stats.orderDomainCallCount++;
-            switch (odvType) {
-                case SIMPLE:
-                    return domains.get(variable);
-            }
-            return null;
-        }
-        */
         
-        /*
-         * Umut:
-         */
         public Vertex selectUnassigned() {
             selectUnassigneCallCount++;
             switch (suvType) {
@@ -428,24 +371,12 @@ public class CSP {
         this.forwardChecking = forwardChecking;
 
         Queue<Paint> colors = new LinkedList<>();
-        colors.add(Color.RED);
-        colors.add(Color.BLUE);
-        colors.add(Color.YELLOW);
-        colors.add(Color.FUCHSIA);
-        colors.add(Color.CYAN);
-
-        /*
-         * Random rndm = new Random(); Queue<Color> colors = new LinkedList<>();
-         * for (int i=0; i<colorCount;i++) { Color clr = new
-         * Color(rndm.nextDouble(),rndm.nextDouble(),rndm.nextDouble(),1.0);
-         * //red,green,blue,opacity while
-         * (clr.getRed()+clr.getGreen()+clr.getBlue()<1.2) clr = clr.brighter();
-         * while (clr.getRed()+clr.getGreen()+clr.getBlue()>2.8) clr =
-         * clr.darker(); clr = clr.saturate(); while (colors.contains(clr)) clr
-         * = new
-         * Color(rndm.nextDouble(),rndm.nextDouble(),rndm.nextDouble(),1.0);
-         * colors.add(clr); }
-         */
+        int c = 0;
+        while (colors.size() < colorCount) {
+            colors.add(COLORS[c]);
+            c++;
+        }
+        
 
         this.standartDomain = new LinkedList<>();
 
@@ -481,7 +412,6 @@ public class CSP {
 
     public CSP.AssignmentsState backTrack() {
         AssignmentsState result = backTrack(new AssignmentsState());
-        System.out.println(result.domains);
         return result;
     }
 

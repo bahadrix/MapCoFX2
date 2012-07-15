@@ -18,7 +18,6 @@ public final class Colorizer {
     // Vars
     private Plotter plotter;
     private Graph<Node> graph;
-    private static Scanner scn = new Scanner(System.in);
 
     public class Node {
 
@@ -46,17 +45,14 @@ public final class Colorizer {
 
     public void mainRoutine() {
         createGraph();
-        // Kuru backTracking yap
-
-        //runWith(SUVType.SIMPLE, ODVType.SIMPLE, false, false);
-
-        // Forward checking yap
-        //CSP.activeForwardChecking = false; // Forward checking domainlere etki etsin mi?
-        //runWith(SUVType.SIMPLE, ODVType.SIMPLE, true, false);
         
-        // TODO Sadece MRV olunca çalışmıyopr enteresan
+        //a
+        runWith(SUVType.SIMPLE, ODVType.SIMPLE, false, false);
+        //b
+        runWith(SUVType.SIMPLE, ODVType.SIMPLE, true, false);
+        //c
         runWith(SUVType.DEGREE, ODVType.LCV, true, true);
-
+        
         System.out.println("OK");
     }
 
@@ -71,6 +67,7 @@ public final class Colorizer {
         }
 
         // İstatistikleri yaz
+        System.out.println(); 
         System.out.println(csp.stats);
         // Sonucu bildir
         if (result.checkComplete()) {
@@ -96,8 +93,8 @@ public final class Colorizer {
 
     public void createGraph() {
 
-        int N = 5;
-        int T = 120;
+        int N = 100;
+        int T = 10;
         int x = 0;
         int y = 0;
 
