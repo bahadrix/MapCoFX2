@@ -110,6 +110,13 @@ public class CSP {
         public List<Assignment> getAssignments() {
             return assignments;
         }
+        
+        public List<Vertex> getAssignmentsVertices() {
+            List<Vertex> li = new LinkedList<>();
+            for (Assignment asg : assignments)
+                li.add(asg.variable);
+            return li;
+        }
 
         public boolean addAssignment(Assignment assignment) {
 
@@ -165,21 +172,7 @@ public class CSP {
         colors.add(Color.YELLOW);
         colors.add(Color.FUCHSIA);
         colors.add(Color.CYAN);
-        /*
-         * *
-         * Random rndm = new Random(); Queue<Color> colors = new LinkedList<>();
-         * for (int i=0; i<colorCount;i++) { Color clr = new
-         * Color(rndm.nextDouble(),rndm.nextDouble(),rndm.nextDouble(),1.0);
-         * //red,green,blue,opacity while
-         * (clr.getRed()+clr.getGreen()+clr.getBlue()<1.2) clr = clr.brighter();
-         * clr = clr.saturate(); while (colors.contains(clr)) clr = new
-         * Color(rndm.nextDouble(),rndm.nextDouble(),rndm.nextDouble(),1.0); for
-         * (Color c : colors) { if
-         * (((c.getRed()+c.getGreen()+c.getBlue())-(clr.getRed()+clr.getGreen()+clr.getBlue()))<0.3)
-         * clr = new
-         * Color(rndm.nextDouble(),rndm.nextDouble(),rndm.nextDouble(),1.0); }
-         * colors.add(clr); }
-         */
+        
         this.standartDomain = new LinkedList<>();
 
         for (int i = 0; i < colorCount; i++) {
@@ -200,30 +193,26 @@ public class CSP {
 
     }
 
-    /*public static boolean isConsistent(Assignment assignment, List<Assignment> assignments) {
-        checkIsConsistentCount++;
-        List<Vertex> neighbours = assignment.variable.getNeighbours();
-        for (Assignment asg : assignments) {
-            // Yapılmış olan bütün atamaları gez
-            for (Graph.Vertex neighbour : neighbours) {
-                // Verilen atamada kullanılan köşenin tüm komşularını gez
-                // Komşuya yapılmış bir atama var ve bu atama verilen atamadaki vertex ile aynı ise constraint sağlanmaz.
-                if (asg.variable.equals(neighbour) && asg.color.equals(assignment.color)) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }*/
-    
+    /*
+     * public static boolean isConsistent(Assignment assignment,
+     * List<Assignment> assignments) { checkIsConsistentCount++; List<Vertex>
+     * neighbours = assignment.variable.getNeighbours(); for (Assignment asg :
+     * assignments) { // Yapılmış olan bütün atamaları gez for (Graph.Vertex
+     * neighbour : neighbours) { // Verilen atamada kullanılan köşenin tüm
+     * komşularını gez // Komşuya yapılmış bir atama var ve bu atama verilen
+     * atamadaki vertex ile aynı ise constraint sağlanmaz. if
+     * (asg.variable.equals(neighbour) && asg.color.equals(assignment.color)) {
+     * return false; } } } return true; }
+     */
     public static boolean isConsistent(Assignment assignment, List<Assignment> assignments) {
         checkIsConsistentCount++;
         List<Vertex> neighbours = assignment.variable.getNeighbours();
-        Color c1 = (Color)assignment.color;
+        Color c1 = (Color) assignment.color;
         for (Assignment asg : assignments) {
-            Color c2 = (Color)asg.color;
-            if (neighbours.contains(asg.variable)&& (c1.getRed()==c2.getRed() && c1.getGreen()==c2.getGreen() &&  c1.getBlue()==c2.getBlue()))
+            Color c2 = (Color) asg.color;
+            if (neighbours.contains(asg.variable) && (c1.getRed() == c2.getRed() && c1.getGreen() == c2.getGreen() && c1.getBlue() == c2.getBlue())) {
                 return false;
+            }
         }
         return true;
     }
@@ -232,7 +221,7 @@ public class CSP {
         stats.checkIsCompleteCount++;
         // Bütün atamalar yapılmış mı?
         if (unassignedVariables.size() > 0) {
-            
+
             return false;
         }
 
@@ -240,19 +229,18 @@ public class CSP {
         for (Assignment asg : assignments) {
             // Bütün atamaların komşuları
             List<Vertex> neighbours = asg.variable.getNeighbours();
-            Color c1 = (Color)asg.color;
+            Color c1 = (Color) asg.color;
             for (Assignment asg2 : assignments) {
                 // Bütün atamalarda
-                Color c2 = (Color)asg2.color;
-                if (neighbours.contains(asg2.variable) && (c1.getRed()==c2.getRed() && c1.getGreen()==c2.getGreen() &&  c1.getBlue()==c2.getBlue())) {
-                        return false;
+                Color c2 = (Color) asg2.color;
+                if (neighbours.contains(asg2.variable) && (c1.getRed() == c2.getRed() && c1.getGreen() == c2.getGreen() && c1.getBlue() == c2.getBlue())) {
+                    return false;
                 }
-                /*for (Vertex neighbour : neighbours) {
-                    // Komşular
-                    if (asg2.variable.equals(neighbour) && asg2.color.equals(asg.color)) {
-                        return false;
-                    }
-                }*/
+                /*
+                 * for (Vertex neighbour : neighbours) { // Komşular if
+                 * (asg2.variable.equals(neighbour) &&
+                 * asg2.color.equals(asg.color)) { return false; } }
+                 */
             }
         }
 
@@ -267,11 +255,11 @@ public class CSP {
                         ? unassignedVariables.remove(0)
                         : null;
             case MRV:
-                if (unassignedVariables.size()>0) {
-                    int min=colorCount+1,pntr=0;
+                if (unassignedVariables.size() > 0) {
+                    int min = colorCount + 1, pntr = 0;
                     for (Vertex v : unassignedVariables) {
                         List<Paint> colors = domains.get(v);
-                        if (colors.size()<=min) {
+                        if (colors.size() <= min) {
                             min = colors.size();
                             pntr = unassignedVariables.indexOf(v);
                         }
@@ -279,7 +267,7 @@ public class CSP {
                     return unassignedVariables.remove(pntr);
                 }
                 return null;
-            default: 
+            default:
                 return unassignedVariables.size() > 0
                         ? unassignedVariables.remove(0)
                         : null;
@@ -291,7 +279,8 @@ public class CSP {
         switch (odvType) {
             case SIMPLE:
                 return domains.get(variable);
-            default: return null;
+            default:
+                return null;
         }
     }
 
@@ -323,30 +312,31 @@ public class CSP {
 
                 state.takeSnapshot();
                 if (state.addAssignment(assignment)) {
-                    it.remove(); // Ekleme yapildiysa domainden çıkar.
+                    //it.remove(); // Ekleme yapildiysa domainden çıkar.
+                    //FC Fail olursa remove'lamamamız lazım?
                     //Inference
                     if (forwardChecking) {
-                        if (forwardCheck(assignment)) {
+                        if (forwardCheck(assignment, state.getAssignmentsVertices())) {
+                            it.remove();
                             return backTrack(state);
                         } else {
                             stats.forwardCheckFailure++;
                             //Komşuların domainlerine silinen rengi geri ekle
                             // Silinenler burada eklendiği için state snaplshot'ından domains'i kaldırdım.
+                            
                             List<Vertex> neighbours = assignment.variable.getNeighbours();
 
                             for (Vertex neighbour : neighbours) {
                                 List<Paint> neighbourDomain = domains.get(neighbour);
-                                neighbourDomain.add(assignment.color);
+                                if (!neighbourDomain.contains(assignment.color)) //zaten atanmış olan komşulara renk eklemememiz lazım?
+                                    neighbourDomain.add(assignment.color);
                             }
+
                             state.removeAssignment(assignment);
                             getNewVariable = true;
-                            //unassigned'lara geri ekle?
-                            //unassignedVariables.add(assignment.variable); 
-                            // bence geri eklemicez çünkü zaten şu anda o değişkenin domaini içersindeyiz.
-                            // yani en içteki döngü o değişkenin domainini çeviriyor zaten
-                            
                         }
                     } else {
+                        it.remove();
                         return backTrack(state);
                     }
                 }
@@ -365,20 +355,21 @@ public class CSP {
      * @param assignment
      * @return
      */
-    public boolean forwardCheck(Assignment assignment) {
+    public boolean forwardCheck(Assignment assignment, List<Vertex> assignments) {
 
         //komşuların domainlerini revize et, boşalan varsa false dön
         List<Vertex> neighbours = assignment.variable.getNeighbours();
-
+        //zaten atanmış olan komşulardan çıkarma yapmamamız lazım?
         for (Vertex neighbour : neighbours) {
-
             List<Paint> neighbourDomain = domains.get(neighbour);
+            if (assignments.contains(neighbour))
+                continue;
             neighbourDomain.remove(assignment.color);
             if (neighbourDomain.isEmpty()) {
                 return false;
             }
         }
-
+        
         return true;
     }
 

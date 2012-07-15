@@ -58,14 +58,14 @@ public class MapCoFX2 extends Application {
             @Override
             public void handle(ScrollEvent e) {
                 
-
+                
                 double currentScale = root.getScaleX();
                 double delta = e.getDeltaY() / 1000;
-                double newScale = (currentScale + delta) < 0 ? 0.001
+                double newScale = (currentScale + delta) < 0 ? 0.1
                         : (currentScale + delta) > 20 ? 20
                         : (currentScale + delta);
-                root.setScaleX(newScale);
-                root.setScaleY(newScale);
+                root.setScaleX(newScale+root.getScaleX());
+                root.setScaleY(newScale+root.getScaleY());
 
             }
         });
