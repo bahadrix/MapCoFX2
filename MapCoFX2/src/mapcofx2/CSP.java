@@ -132,18 +132,14 @@ public class CSP {
                 case SIMPLE:
                     return unassignedVariables.size() > 0 ? unassignedVariables.remove(0) : null;
                 case MRV:
-
-                    PriorityQueue<Graph.Vertex> MRVOrdered = new PriorityQueue(unassignedVariables.size(), new Comparator() {
+                    PriorityQueue<Graph.Vertex> MRVOrdered = new PriorityQueue<>(colorCount, new Comparator<Graph.Vertex>() {
 
                         @Override
-                        public int compare(Object t, Object t1) {
-                            // -1 ise t önce gelir demekti sanırım.
-                            Vertex v1 = (Vertex) t;
-                            Vertex v2 = (Vertex) t1;
-                            
+                        public int compare(Vertex v1, Vertex v2) {
+
                             int d1Size = domains.get(v1).size();
                             int d2Size = domains.get(v2).size();
-                            
+
                             if (d1Size == d2Size) {
                                 if (suvType == SUVType.DEGREE) {
                                     if (v1.neighbourCount() > v2.neighbourCount()) {
@@ -162,12 +158,14 @@ public class CSP {
                                 return 1;
                             }
 
+
                         }
                     });
+
                     System.out.println(domains);
                     MRVOrdered.addAll(unassignedVariables);
                     return MRVOrdered.poll();
-                            
+
                 default:
                     return unassignedVariables.size() > 0
                             ? unassignedVariables.remove(0)
@@ -176,11 +174,47 @@ public class CSP {
 
         }
 
-        public List<Paint> orderDomain(Graph.Vertex variable) {
+        public List<Paint> orderDomain(final Graph.Vertex variable) {
             stats.orderDomainCallCount++;
             switch (odvType) {
                 case SIMPLE:
                     return domains.get(variable);
+                case LCV:
+
+                    // değişkenin komşularını en az rahatsız eden value'sunu döndür
+                    List<Paint> varDomain = domains.get(variable);
+                    PriorityQueue<Paint> LCVOrdered = new PriorityQueue<>(varDomain.size(), new Comparator<Paint>() {
+
+                        @Override
+                        public int compare(Paint t, Paint t1) {
+                            int t1Score = 0;
+                            int t2Score = 0;
+
+                            for (Vertex v : (List<Vertex>) variable.getNeighbours()) {
+                                if (domains.get(v).contains(t)) {
+                                    t1Score++;
+                                }
+                                if (domains.get(v).contains(t1)) {
+                                    t2Score++;
+                                }
+                            }
+
+                            if (t1Score < t2Score) {
+                                return -1;
+                            } else if (t1Score == t2Score) {
+                                return 0;
+                            } else {
+                                return 1;
+                            }
+
+                        }
+                    });
+                    LCVOrdered.addAll(varDomain);
+                    return new LinkedList<>(LCVOrdered);
+
+
+
+
             }
             return null;
         }

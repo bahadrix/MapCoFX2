@@ -47,16 +47,28 @@ public final class Colorizer {
     public void mainRoutine() {
         createGraph();
         // Kuru backTracking yap
+        //runWith(SUVType.SIMPLE, ODVType.SIMPLE, false, true);
+        
+        //Kuru + LCV 
+        //runWith(SUVType.SIMPLE, ODVType.LCV, false, true);
 
-        //runWith(SUVType.SIMPLE, ODVType.SIMPLE, false, false);
-
-        // Forward checking yap
+        //Forward checking yap
         //CSP.activeForwardChecking = false; // Forward checking domainlere etki etsin mi?
         //runWith(SUVType.SIMPLE, ODVType.SIMPLE, true, false);
         
-        // TODO Sadece MRV olunca çalışmıyopr enteresan
-        runWith(SUVType.DEGREE, ODVType.SIMPLE, true, true);
-
+        //TODO Sadece MRV olunca çalışmıyor enteresan
+        //runWith(SUVType.MRV, ODVType.SIMPLE, true, true);
+        
+        
+        // a şıkkı
+        runWith(SUVType.SIMPLE, ODVType.SIMPLE, false, false);
+        
+        // b şıkkı
+        runWith(SUVType.SIMPLE, ODVType.SIMPLE, true, false);
+        
+        // c şıkkı
+        runWith(SUVType.DEGREE, ODVType.LCV, true, true);
+        
         System.out.println("OK");
     }
 
@@ -96,8 +108,8 @@ public final class Colorizer {
 
     public void createGraph() {
 
-        int N = 5;
-        int T = 120;
+        int N = 100;
+        int T = 12;
         int x = 0;
         int y = 0;
 
