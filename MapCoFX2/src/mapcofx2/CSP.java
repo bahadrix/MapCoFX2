@@ -52,7 +52,6 @@ public class CSP {
         public int successfulAssignmentCount = 0;
         public int failedAssignmentCount = 0;
         public int orderDomainCallCount = 0;
-        public int revertCount = 0;
         public int forwardCheckFailure = 0;
 
         public Stats() {
@@ -74,8 +73,7 @@ public class CSP {
                     + "Failed Assignment Count:" + failedAssignmentCount + "\r\n"
                     + "Consistency check count:" + checkIsConsistentCount + "\r\n"
                     + "Order-Domain Call Count:" + orderDomainCallCount + "\r\n"
-                    + "Select-Unassigned Call Count:" + selectUnassigneCallCount + "\r\n"
-                    + "Backtrack count:" + revertCount;
+                    + "Select-Unassigned Call Count:" + selectUnassigneCallCount + "\r\n";
         }
     }
 
@@ -456,8 +454,6 @@ public class CSP {
                 }
 
 
-                stats.revertCount++;
-
             }
             System.out.println("Olmuyordu, zorlamadim..");
 
@@ -467,19 +463,4 @@ public class CSP {
         }
         return state;
     }
-//    private boolean domainRevise(Graph.Edge arc) {
-//        boolean revised = false;
-//        List<Paint> startDomain = domains.get(arc.getStart());
-//        List<Paint> finishDomain = domains.get(arc.getFinish());
-//
-//        Iterator<Paint> it = startDomain.iterator();
-//        while (it.hasNext()) {
-//            Paint value = it.next();
-//            if (finishDomain.contains(value)) {
-//                it.remove();
-//                revised = true;
-//            }
-//        }
-//        return revised;
-//    }
 }
