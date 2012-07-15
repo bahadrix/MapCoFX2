@@ -3,6 +3,7 @@
  */
 package mapcofx2;
 
+import com.sun.javaws.exceptions.ExitException;
 import java.util.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -82,9 +83,9 @@ public class CSP {
     public class AssignmentsState {
 
         private List<Assignment> assignments;
-        private List<Assignment> snapShot;
         private Map<Vertex, List<Paint>> domains;
         private List<Graph.Vertex> unassignedVariables;
+        private Assignment actionAssignment;
 
         public AssignmentsState() {
             assignments = new LinkedList<>();
@@ -111,22 +112,7 @@ public class CSP {
             this.assignments = new LinkedList<>(cloneFrom.getAssignments());
             this.domains = new HashMap<>(cloneFrom.domains);
             this.unassignedVariables = new LinkedList<>(cloneFrom.unassignedVariables);
-        }
 
-        public void takeSnapshot() {
-            this.snapShot = new LinkedList<>(this.assignments);
-        }
-
-        public void trackBack() {
-            // Herşeyi snapShot'a çek
-            revert();
-
-            // Son yapılan atamadaki rengi tekrar çıkar
-
-            Assignment lastAssignment = assignments.get(assignments.size() - 1);
-            List<Paint> lastAsgDomain = domains.get(lastAssignment.variable); // Son eklenen assignment'daki vertex'in domaini
-
-            lastAsgDomain.remove(lastAssignment.color);
         }
 
         public Vertex selectUnassigned() {
@@ -147,11 +133,6 @@ public class CSP {
             return null;
         }
 
-        public void revert() {
-            stats.revertCount++;
-            this.assignments = new LinkedList<>(this.snapShot);
-        }
-
         public List<Assignment> getAssignments() {
             return assignments;
         }
@@ -164,12 +145,14 @@ public class CSP {
             }
 
             if (CSP.isConsistent(assignment, assignments)) {
-                // Bu state'in bu variable'inin domaininden atanan renk backtrack'İn içinde çıkarılıyor
-
+                // Bu state'in bu variable'inin domaininden atanan renk 
+                // burada değil backtrack'in içinde çıkarılıyor
+                
                 // Bu state'ten Yeni bir state oluştur
                 AssignmentsState newState = new AssignmentsState(this);
                 // Yeni state'e ilgili atamayı ekle
                 newState.assignments.add(assignment);
+                newState.actionAssignment = assignment;
                 stats.successfulAssignmentCount++;
                 return newState;
             } else {
@@ -205,15 +188,20 @@ public class CSP {
             return true;
         }
 
-        public boolean forwardCheck(Assignment assignment) {
-
+        public boolean forwardCheck() throws Exception {
+            if (actionAssignment == null) { // Atama yapmadan forwardCheck yapılmak istenirse hata vermek amaçlı
+                throw new Exception("Forward check yanlış yerde kullanılmış, backtrack algoritmasını kontrol edin");
+            }
             //komşuların domainlerini revize et, boşalan varsa false dön
-            List<Vertex> neighbours = assignment.variable.getNeighbours();
+            List<Vertex> neighbours = actionAssignment.variable.getNeighbours();
 
+            //Map<Vertex, List<Paint>> domainsClone = new HashMap<>(domains);
+            
             for (Vertex neighbour : neighbours) {
-
+                
                 List<Paint> neighbourDomain = domains.get(neighbour);
-                neighbourDomain.remove(assignment.color);
+                
+                neighbourDomain.remove(actionAssignment.color);
                 if (neighbourDomain.isEmpty()) {
                     return false;
                 }
@@ -301,50 +289,56 @@ public class CSP {
     }
 
     public AssignmentsState backTrack(AssignmentsState state) {
+        try {
+            if (state.checkComplete()) {
+                return state;
+            }
+            // Verilen state ait atanmamış değişken ve domainlerden seç
+            Graph.Vertex variable = state.selectUnassigned();
+            List<Paint> domain = state.orderDomain(variable);
 
-        if (state.checkComplete()) {
-            return state;
-        }
+            if (domain.isEmpty()) {
 
-        Graph.Vertex variable = state.selectUnassigned();
-        List<Paint> domain = state.orderDomain(variable);
-        if (domain.isEmpty()) {
+                System.out.println("Empty domain");
+                return state;
+            }
 
-            System.out.println("Empty domain");
-            return state;
-        }
+            Iterator<Paint> parentStateIterator = domain.iterator();
+            while (parentStateIterator.hasNext()) {
 
-        Iterator<Paint> it = domain.iterator();
-        while (it.hasNext()) {
+                Paint value = parentStateIterator.next();
 
-            Paint value = it.next();
+                Assignment assignment = new Assignment(variable, value);
 
-            Assignment assignment = new Assignment(variable, value);
+                AssignmentsState newState = state.addAssignment(assignment);
+                parentStateIterator.remove(); // Atama uygun olsa da olmasada domainden rengi çıkar
+                if (newState != null) {
 
-            AssignmentsState newState = state.addAssignment(assignment);
-            it.remove(); // Atama uygun olsa da olmasada domainden rengi çıkar
-            if (newState != null) {
-
-                //Inference
-                if (forwardChecking) {
-                    if (newState.forwardCheck(assignment)) {
-
-                        return backTrack(newState);
+                    //Inference
+                    if (forwardChecking) {
+                        if (newState.forwardCheck()) {
+                            // atama olduysa burdan yürü
+                            return backTrack(newState);
+                        } else {
+                            stats.forwardCheckFailure++;
+                        }
                     } else {
-
-                        stats.forwardCheckFailure++;
+                        // atama olduysa burdan yürü
+                        return backTrack(newState);
                     }
-                } else {
-                    return backTrack(newState);
+
                 }
 
-            }
-            
-            
-            stats.revertCount++;
 
+                stats.revertCount++;
+
+            }
+            System.out.println("Olmuyordu, zorlamadim..");
+            
+        } catch (Exception e) {
+            System.out.println("HATA: " + e.getMessage());
+            System.exit(1);
         }
-        System.out.println("Olmuyordu, zorlamadim..");
         return state;
     }
 //    private boolean domainRevise(Graph.Edge arc) {

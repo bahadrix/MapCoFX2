@@ -51,7 +51,8 @@ public final class Colorizer {
         System.out.println("Çizge oluşturuldu.");
         
         // Kuru backTracking yap
-        //runWith(SUVType.SIMPLE, ODVType.SIMPLE, false);
+ 
+        runWith(SUVType.SIMPLE, ODVType.SIMPLE, false);
         
         // Forward checking yap
         runWith(SUVType.SIMPLE, ODVType.SIMPLE, true);
@@ -96,7 +97,7 @@ public final class Colorizer {
     public void createGraph() {
 
         int N = 100;
-        int T = 10;
+        int T = 9;
         int x = 0;
         int y = 0;
 
