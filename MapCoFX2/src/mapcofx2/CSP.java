@@ -35,6 +35,7 @@ public class CSP {
     final public Stats stats;
     private static int checkIsConsistentCount = 0;
     private static int selectUnassigneCallCount = 0;
+    public static boolean activeForwardChecking = true;
 
     public class Stats {
 
@@ -110,7 +111,17 @@ public class CSP {
          */
         public AssignmentsState(AssignmentsState cloneFrom) {
             this.assignments = new LinkedList<>(cloneFrom.getAssignments());
-            this.domains = new HashMap<>(cloneFrom.domains);
+
+            //Cloning domain set
+            // ForwardCheck'in son kalan rengi kullanmaması hatasının sebebi
+            // bunun yerine this.domains = new HashMap<>(cloneFrom.domains) kullanılmasıymış
+
+            this.domains = new HashMap<>();
+            for (Vertex cv : cloneFrom.domains.keySet()) {
+                domains.put(cv, new LinkedList<>(cloneFrom.domains.get(cv)));
+            }
+            // eof CLoning domain set
+
             this.unassignedVariables = new LinkedList<>(cloneFrom.unassignedVariables);
 
         }
@@ -147,7 +158,7 @@ public class CSP {
             if (CSP.isConsistent(assignment, assignments)) {
                 // Bu state'in bu variable'inin domaininden atanan renk 
                 // burada değil backtrack'in içinde çıkarılıyor
-                
+
                 // Bu state'ten Yeni bir state oluştur
                 AssignmentsState newState = new AssignmentsState(this);
                 // Yeni state'e ilgili atamayı ekle
@@ -189,25 +200,42 @@ public class CSP {
         }
 
         public boolean forwardCheck() throws Exception {
+
             if (actionAssignment == null) { // Atama yapmadan forwardCheck yapılmak istenirse hata vermek amaçlı
                 throw new Exception("Forward check yanlış yerde kullanılmış, backtrack algoritmasını kontrol edin");
             }
+
+            boolean inference = true;
+
             //komşuların domainlerini revize et, boşalan varsa false dön
             List<Vertex> neighbours = actionAssignment.variable.getNeighbours();
 
             //Map<Vertex, List<Paint>> domainsClone = new HashMap<>(domains);
             
-            for (Vertex neighbour : neighbours) {
-                
-                List<Paint> neighbourDomain = domains.get(neighbour);
-                
-                neighbourDomain.remove(actionAssignment.color);
-                if (neighbourDomain.isEmpty()) {
-                    return false;
+           
+            for (Vertex neighbour : neighbours) { // Komşulardan    
+                if (unassignedVariables.contains(neighbour)) { // Atanmamış olanlara bak
+                    
+                    List<Paint> neighbourDomain = domains.get(neighbour);
+
+
+                    if (neighbourDomain.contains(actionAssignment.color)) {
+
+                        if (neighbourDomain.size() == 1) { // komşu domain'in son kalan elemanı bu renk ise FC: false
+                            inference = false;
+                        }
+                        if (activeForwardChecking) { // FC kullanılamayacak renkleri domainlerden silsin mi?
+                            neighbourDomain.remove(actionAssignment.color);
+                        }
+
+
+                    }
                 }
+
             }
 
-            return true;
+
+            return inference;
         }
 
         @Override
@@ -285,7 +313,9 @@ public class CSP {
     }
 
     public CSP.AssignmentsState backTrack() {
-        return backTrack(new AssignmentsState());
+        AssignmentsState result = backTrack(new AssignmentsState());
+        System.out.println(result.domains);
+        return result;
     }
 
     public AssignmentsState backTrack(AssignmentsState state) {
@@ -297,21 +327,20 @@ public class CSP {
             Graph.Vertex variable = state.selectUnassigned();
             List<Paint> domain = state.orderDomain(variable);
 
-            if (domain.isEmpty()) {
-
-                System.out.println("Empty domain");
-                return state;
-            }
 
             Iterator<Paint> parentStateIterator = domain.iterator();
             while (parentStateIterator.hasNext()) {
 
                 Paint value = parentStateIterator.next();
 
-                Assignment assignment = new Assignment(variable, value);
 
-                AssignmentsState newState = state.addAssignment(assignment);
+
+
+                Assignment assignment = new Assignment(variable, value);
                 parentStateIterator.remove(); // Atama uygun olsa da olmasada domainden rengi çıkar
+                
+                AssignmentsState newState = state.addAssignment(assignment);
+                 
                 if (newState != null) {
 
                     //Inference
@@ -334,7 +363,7 @@ public class CSP {
 
             }
             System.out.println("Olmuyordu, zorlamadim..");
-            
+
         } catch (Exception e) {
             System.out.println("HATA: " + e.getMessage());
             System.exit(1);

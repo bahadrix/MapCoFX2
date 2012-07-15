@@ -45,41 +45,40 @@ public final class Colorizer {
     }
 
     public void mainRoutine() {
-
-        System.out.println("Çizge oluşturuluyor..");
         createGraph();
-        System.out.println("Çizge oluşturuldu.");
-        
         // Kuru backTracking yap
- 
-        runWith(SUVType.SIMPLE, ODVType.SIMPLE, false);
-        
+
+        runWith(SUVType.SIMPLE, ODVType.SIMPLE, false, false);
+
         // Forward checking yap
-        runWith(SUVType.SIMPLE, ODVType.SIMPLE, true);
-        
+        CSP.activeForwardChecking = false; // Forward checking domainlere etki etsin mi?
+        runWith(SUVType.SIMPLE, ODVType.SIMPLE, true, true);
+
         System.out.println("OK");
     }
 
-    
-    public void runWith(SUVType suvType, ODVType odvType, boolean forwarChecking) {
+    public void runWith(SUVType suvType, ODVType odvType, boolean forwarChecking, boolean paintIt) {
         // Problemi oluştur
         CSP csp = new CSP(graph, 5, suvType, odvType, forwarChecking);
         CSP.AssignmentsState result = csp.backTrack();
-        
+
         // Atamaya göre düğümleri boya
-        paintAssignment(result.getAssignments());
-        
+        if (paintIt) {
+            paintAssignment(result.getAssignments());
+        }
+
+        // İstatistikleri yaz
+        System.out.println(csp.stats);
         // Sonucu bildir
         if (result.checkComplete()) {
             System.out.println("Problem çözüldü!");
         } else {
             System.out.println(result.getAssignments().size() + ". düğümden sonrası gelmedi ");
         }
+
         
-        // İstatistikleri yaz
-        System.out.println(csp.stats);
     }
-    
+
     public void paintAssignment(List<Assignment> assignments) {
 
         for (Assignment asg : assignments) {
@@ -91,13 +90,11 @@ public final class Colorizer {
 
 
     }
-    
-   
 
     public void createGraph() {
 
-        int N = 100;
-        int T = 9;
+        int N = 5;
+        int T = 120;
         int x = 0;
         int y = 0;
 
